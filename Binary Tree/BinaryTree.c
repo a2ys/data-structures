@@ -57,7 +57,7 @@ int searchDFS(TreeNode* root, int value) {
 
 void inOrder(TreeNode* root) {
   if (root) {
-      inOrder(root->left);
+    inOrder(root->left);
     printf("%d ", root->data);
     inOrder(root->right);
   }
