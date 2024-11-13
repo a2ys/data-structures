@@ -81,7 +81,8 @@ int findMinDistance(int distance[], int visited[]) {
   return minIndex;
 }
 
-void dijkstra(Graph* graph, int source) {
+// Dijkstra's Algorithm for weighted graphs
+void dijkstra(int graph[MAX_VERTICES][MAX_VERTICES], int source) {
   int distance[MAX_VERTICES];
   int visited[MAX_VERTICES];
 
@@ -91,6 +92,23 @@ void dijkstra(Graph* graph, int source) {
   }
 
   distance[source] = 0;
+
+  for (int i = 0; i < MAX_VERTICES - 1; i++) {
+    int u = findMinDistance(distance, visited);
+    visited[u] = true;
+
+    for (int v = 0; v < MAX_VERTICES; v++) {
+      if (!visited[v] && graph[u][v] && distance[u] != INT_MAX &&
+          distance[u] + graph[u][v] < distance[v]) {
+        distance[v] = distance[u] + graph[u][v];
+      }
+    }
+  }
+
+  printf("Vertex\tDistance From Source\n");
+  for (int i = 0; i < MAX_VERTICES; i++) {
+    printf("%d\t%d\n", i, distance[i]);
+  }
 }
 
 void printAdjMatrix(Graph* graph) {
@@ -123,6 +141,19 @@ int main() {
   
     printf("BFS starting from vertex 0:\n");
     BFS(graph, 0);
+
+    // Example directed graph represented with an adjacency matrix
+    int newGraph[MAX_VERTICES][MAX_VERTICES] = {
+        {0, 10, 3, 0, 0},
+        {0, 0, 1, 2, 0},
+        {0, 4, 0, 8, 2},
+        {0, 0, 0, 0, 7},
+        {0, 0, 0, 9, 0}
+    };
+
+    int source = 0;
+    printf("\nDijkstra's Shortest Path for Directed Graph starting from vertex %d:\n", source);
+    dijkstra(newGraph, source);
     
     return 0;
 }
