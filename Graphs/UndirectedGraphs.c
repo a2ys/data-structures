@@ -1,14 +1,29 @@
 #include <limits.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
 #define MAX_VERTICES 5
+#define INF 0 // 0 to represent no edge between two vertices
 
 typedef struct Graph {
   int numVertices;
   int** adjMatrix;
 } Graph;
+
+typedef struct Edge {
+  int src, dest, weight;
+} Edge;
+
+typedef struct KruskalsGraph {
+  int E; // Number of Edges
+  Edge* edges;
+} KruskalsGraph;
+
+typedef struct Subset {
+  int parent, rank;
+} Subset;
 
 // Creating a graph
 struct Graph* createGraph(int V) {
@@ -111,6 +126,55 @@ void dijkstra(int graph[MAX_VERTICES][MAX_VERTICES], int source) {
   }
 }
 
+// Part of Prim's Algorithm
+int findMinKey(int key[], bool inMST[]) {
+  int min = INT_MAX, minIndex;
+
+  for (int v = 0; v < MAX_VERTICES; v++) {
+    if (!inMST[v] && key[v] < min) {
+      min = key[v];
+      minIndex = v;
+    }
+  }
+
+  return minIndex;
+}
+
+void printMST(int parent[], int graph[MAX_VERTICES][MAX_VERTICES]) {
+  printf("Edge\tWeight\n");
+  for (int i = 1; i < MAX_VERTICES; i++) {
+    printf("%d - %d\t%d\n", parent[i], i, graph[i][parent[i]]);
+  }
+}
+
+void primMST(int graph[MAX_VERTICES][MAX_VERTICES]) {
+  int parent[MAX_VERTICES];
+  int key[MAX_VERTICES];
+  bool inMST[MAX_VERTICES];
+
+  for (int i = 0; i < MAX_VERTICES; i++) {
+    key[i] = INT_MAX;
+    inMST[i] = false;
+  }
+
+  key[0] = 0;
+  parent[0] = -1;
+
+  for (int count = 0; count < MAX_VERTICES - 1; count++) {
+    int u = findMinKey(key, inMST);
+    inMST[u] = true;
+
+    for (int v = 0; v < MAX_VERTICES; v++) {
+      if (graph[u][v] && !inMST[v] && graph[u][v] < key[v]) {
+        parent[v] = u;
+        key[v] = graph[u][v];
+      }
+    }
+  }
+
+  printMST(parent, graph);
+}
+
 void printAdjMatrix(Graph* graph) {
   for (int i = 0; i < graph->numVertices; i++) {
     for (int j = 0; j < graph->numVertices; j++) {
@@ -154,6 +218,19 @@ int main() {
     int source = 0;
     printf("\nDijkstra's Shortest Path for Directed Graph starting from vertex %d:\n", source);
     dijkstra(newGraph, source);
+
+     int newGraph2[MAX_VERTICES][MAX_VERTICES] = {
+        {0, 2, 0, 6, 0},
+        {2, 0, 3, 8, 5},
+        {0, 3, 0, 0, 7},
+        {6, 8, 0, 0, 9},
+        {0, 5, 7, 9, 0}
+    };
+
+    printf("Prim's Minimum Spanning Tree:\n");
+    primMST(newGraph2);
+
+    return 0;
     
     return 0;
 }
