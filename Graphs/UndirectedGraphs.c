@@ -252,3 +252,109 @@ int main()
 
   return 0;
 }
+
+// Path printing Dijkstra's Algorithm
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+#define MAX 100
+
+int dist[MAX], prev[MAX], visited[MAX];
+int graph[MAX][MAX]; // Adjacency matrix to represent the graph
+
+void addEdge(int u, int v, int w)
+{
+  graph[u][v] = w;
+  graph[v][u] = w; // Assuming undirected graph
+}
+
+void dijkstra(int source, int n)
+{
+  for (int i = 0; i < n; i++)
+  {
+    dist[i] = INT_MAX;
+    visited[i] = 0;
+    prev[i] = -1;
+  }
+  dist[source] = 0;
+
+  for (int i = 0; i < n - 1; i++)
+  {
+    int minDist = INT_MAX, minIndex = -1;
+    for (int j = 0; j < n; j++)
+    {
+      if (!visited[j] && dist[j] < minDist)
+      {
+        minDist = dist[j];
+        minIndex = j;
+      }
+    }
+    visited[minIndex] = 1;
+
+    for (int j = 0; j < n; j++)
+    {
+      if (graph[minIndex][j] != 0 && !visited[j])
+      { // Check for edges
+        int weight = graph[minIndex][j];
+        if (dist[minIndex] + weight < dist[j])
+        {
+          dist[j] = dist[minIndex] + weight;
+          prev[j] = minIndex;
+        }
+      }
+    }
+  }
+}
+
+void printPath(int destination)
+{
+  if (prev[destination] == -1)
+  {
+    printf("No path found\n");
+    return;
+  }
+  int path[MAX], pathIndex = 0;
+  for (int v = destination; v != -1; v = prev[v])
+  {
+    path[pathIndex++] = v;
+  }
+  printf("Shortest path: ");
+  for (int i = pathIndex - 1; i > 0; i--)
+  {
+    printf("%d -> ", path[i]);
+  }
+  printf("%d\n", path[0]);
+  printf("Shortest distance: %d\n", dist[destination]);
+}
+
+int main()
+{
+  int n, m, u, v, w, s, d;
+  scanf("%d", &n);
+  scanf("%d", &m);
+
+  // Initialize the graph with 0s
+  for (int i = 0; i < n; i++)
+  {
+    for (int j = 0; j < n; j++)
+    {
+      graph[i][j] = 0;
+    }
+  }
+
+  for (int i = 0; i < m; i++)
+  {
+    scanf("%d %d %d", &u, &v, &w);
+    addEdge(u, v, w);
+  }
+
+  scanf("%d", &s);
+  scanf("%d", &d);
+
+  dijkstra(s, n);
+  printPath(d);
+
+  return 0;
+}
