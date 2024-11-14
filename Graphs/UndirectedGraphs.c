@@ -358,3 +358,410 @@ int main()
 
   return 0;
 }
+
+// Cycle detection
+#include <stdio.h>
+#include <limits.h>
+
+#define MAX_VERTICES 5
+#define INF INT_MAX
+
+int adjMatrix[MAX_VERTICES][MAX_VERTICES];
+
+// Function to find the shortest cycle in the graph
+int findShortestCycle(int v)
+{
+  int shortestCycle = INF;
+
+  // Iterate over each vertex as the starting point
+  for (int start = 0; start < v; ++start)
+  {
+    int distance[MAX_VERTICES];
+    int queue[MAX_VERTICES], front = 0, back = 0;
+
+    // Initialize distances to INF and queue
+    for (int i = 0; i < v; ++i)
+    {
+      distance[i] = INF;
+    }
+    distance[start] = 0;
+    queue[back++] = start;
+
+    // Perform BFS from the start vertex
+    while (front < back)
+    {
+      int u = queue[front++];
+      for (int dest = 0; dest < v; ++dest)
+      {
+        if (adjMatrix[u][dest] > 0)
+        { // Check for an edge
+          // If dest is not visited yet
+          if (distance[dest] == INF)
+          {
+            distance[dest] = distance[u] + adjMatrix[u][dest];
+            queue[back++] = dest;
+          }
+          // If a cycle is found (back to start)
+          else if (distance[u] + adjMatrix[u][dest] < shortestCycle)
+          {
+            shortestCycle = distance[u] + adjMatrix[u][dest];
+          }
+        }
+      }
+    }
+  }
+
+  return (shortestCycle == INF) ? -1 : shortestCycle;
+}
+
+int main()
+{
+  int v, e;
+  printf("Enter the number of vertices: ");
+  scanf("%d", &v);
+  printf("Enter the number of edges: ");
+  scanf("%d", &e);
+
+  // Initialize adjacency matrix with 0 (no edges)
+  for (int i = 0; i < v; i++)
+  {
+    for (int j = 0; j < v; j++)
+    {
+      adjMatrix[i][j] = 0;
+    }
+  }
+
+  // Read edges
+  printf("Enter edges in format (source destination weight):\n");
+  for (int i = 0; i < e; i++)
+  {
+    int src, dest, weight;
+    scanf("%d %d %d", &src, &dest, &weight);
+    adjMatrix[src][dest] = weight;
+  }
+
+  int result = findShortestCycle(v);
+  if (result == -1)
+  {
+    printf("No cycle found in the graph.\n");
+  }
+  else
+  {
+    printf("Length of the shortest cycle: %d\n", result);
+  }
+
+  return 0;
+}
+
+// Connected Components
+
+#include <stdio.h>
+#include <stdbool.h>
+
+#define MAX_V 10
+
+// Global variables for adjacency matrix and visited array
+bool adjMatrix[MAX_V][MAX_V] = {false};
+bool visited[MAX_V] = {false};
+
+// DFS function to explore all nodes connected to 'v'
+void dfs(int v, int V, int *component, int *count)
+{
+  visited[v] = true;
+  component[(*count)++] = v;
+  for (int i = 0; i < V; i++)
+  {
+    if (adjMatrix[v][i] && !visited[i])
+    {
+      dfs(i, V, component, count);
+    }
+  }
+}
+
+int main()
+{
+  int V;
+  printf("Enter the number of vertices: ");
+  scanf("%d", &V);
+
+  // Read edges and fill the adjacency matrix
+  printf("Enter edges (enter -1 -1 to end):\n");
+  while (1)
+  {
+    int u, v;
+    scanf("%d %d", &u, &v);
+    if (u == -1 && v == -1)
+      break;
+    adjMatrix[u][v] = true;
+    adjMatrix[v][u] = true;
+  }
+
+  printf("Following are connected components:\n");
+  // Iterate over each vertex to find connected components
+  for (int i = 0; i < V; i++)
+  {
+    if (!visited[i])
+    {
+      int component[MAX_V], count = 0;
+      dfs(i, V, component, &count);
+      // Print the component
+      for (int j = 0; j < count; j++)
+      {
+        printf("%d ", component[j]);
+      }
+      printf("\n");
+    }
+  }
+
+  return 0;
+}
+
+// Bipartite Graph
+
+#include <stdio.h>
+#include <stdbool.h>
+
+#define MAX 6
+#define UNCOLORED -1
+#define RED 0
+#define BLUE 1
+
+// Function to check if the graph is bipartite using BFS
+bool isBipartite(int G[MAX][MAX], int n, int src)
+{
+  int color[MAX];
+  for (int i = 0; i < n; i++)
+  {
+    color[i] = UNCOLORED; // Initially, all vertices are uncolored
+  }
+
+  // Start BFS from the source vertex
+  color[src] = RED;
+  int queue[MAX];
+  int front = 0, rear = 0;
+  queue[rear++] = src;
+
+  while (front != rear)
+  {
+    int u = queue[front++];
+
+    for (int v = 0; v < n; v++)
+    {
+      // Check for self-loop
+      if (G[u][v] == 1 && u == v)
+      {
+        return false; // Self-loop means not bipartite
+      }
+
+      // If an adjacent vertex is uncolored, assign an alternate color and add to queue
+      if (G[u][v] == 1 && color[v] == UNCOLORED)
+      {
+        color[v] = (color[u] == RED) ? BLUE : RED;
+        queue[rear++] = v;
+      }
+      // If an adjacent vertex has the same color, then the graph is not bipartite
+      else if (G[u][v] == 1 && color[v] == color[u])
+      {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+int main()
+{
+  int n;
+  printf("Enter the number of computers (nodes): ");
+  scanf("%d", &n);
+
+  int G[MAX][MAX];
+  printf("Enter the adjacency matrix:\n");
+  for (int i = 0; i < n; i++)
+  {
+    for (int j = 0; j < n; j++)
+    {
+      scanf("%d", &G[i][j]);
+    }
+  }
+
+  int src;
+  printf("Enter the source computer (starting node): ");
+  scanf("%d", &src);
+
+  if (isBipartite(G, n, src))
+  {
+    printf("Yes, the given graph is Bipartite\n");
+  }
+  else
+  {
+    printf("No, the given graph is not Bipartite\n");
+  }
+
+  return 0;
+}
+
+// Length of longest path
+
+#include <stdio.h>
+
+#define MAX 5
+
+int directions[8][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
+
+// Function to check if a cell is within matrix bounds
+int isValid(int x, int y, int n, int m)
+{
+  return x >= 0 && x < n && y >= 0 && y < m;
+}
+
+// Depth-First Search to find the longest consecutive path from a starting cell
+int dfs(char matrix[MAX][MAX], int x, int y, int n, int m, char prevChar)
+{
+  int maxLength = 1;
+
+  for (int i = 0; i < 8; i++)
+  {
+    int newX = x + directions[i][0];
+    int newY = y + directions[i][1];
+
+    // Check if the next cell has the consecutive character
+    if (isValid(newX, newY, n, m) && matrix[newX][newY] == prevChar + 1)
+    {
+      int pathLength = 1 + dfs(matrix, newX, newY, n, m, matrix[newX][newY]);
+      if (pathLength > maxLength)
+      {
+        maxLength = pathLength;
+      }
+    }
+  }
+
+  return maxLength;
+}
+
+// Function to find the longest path length starting from a specific character
+int findLongestPath(char matrix[MAX][MAX], int n, int m, char startChar)
+{
+  int longestPath = 0;
+
+  // Check each cell in the matrix for the starting character
+  for (int i = 0; i < n; i++)
+  {
+    for (int j = 0; j < m; j++)
+    {
+      if (matrix[i][j] == startChar)
+      {
+        int currentPathLength = dfs(matrix, i, j, n, m, startChar);
+        if (currentPathLength > longestPath)
+        {
+          longestPath = currentPathLength;
+        }
+      }
+    }
+  }
+
+  return longestPath;
+}
+
+int main()
+{
+  int n, m;
+  printf("Enter the number of rows: ");
+  scanf("%d", &n);
+  printf("Enter the number of columns: ");
+  scanf("%d", &m);
+
+  char matrix[MAX][MAX];
+  printf("Enter the matrix of characters:\n");
+  for (int i = 0; i < n; i++)
+  {
+    for (int j = 0; j < m; j++)
+    {
+      scanf(" %c", &matrix[i][j]);
+    }
+  }
+
+  char startChar;
+  printf("Enter the starting character: ");
+  scanf(" %c", &startChar);
+
+  int longestPath = findLongestPath(matrix, n, m, startChar);
+  printf("The length of the longest path with consecutive characters starting from character %c is %d\n", startChar, longestPath);
+
+  return 0;
+}
+
+// Level of a node
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define MAX_NODES 100
+
+// Function to perform BFS and find the level of node X
+int bfs(int V, int adj_matrix[MAX_NODES][MAX_NODES], int X)
+{
+  int visited[MAX_NODES] = {0}; // visited array to keep track of visited nodes
+  int level[MAX_NODES] = {-1};  // -1 means not reachable
+  int queue[MAX_NODES], front = 0, rear = 0;
+
+  // Start BFS from node 0
+  visited[0] = 1;
+  level[0] = 0;
+  queue[rear++] = 0; // enqueue node 0
+
+  while (front < rear)
+  {
+    int node = queue[front++]; // dequeue a node
+
+    // Check all the neighbors of the current node
+    for (int i = 0; i < V; i++)
+    {
+      if (adj_matrix[node][i] == 1 && !visited[i])
+      {                             // if there is an edge
+        visited[i] = 1;             // mark node as visited
+        level[i] = level[node] + 1; // set the level of the neighbor node
+        queue[rear++] = i;          // enqueue the neighbor node
+
+        // If we reached the target node X, return the level
+        if (i == X)
+        {
+          return level[i];
+        }
+      }
+    }
+  }
+
+  return -1; // If the node X is not reachable
+}
+
+int main()
+{
+  int V, E;
+  scanf("%d %d", &V, &E);
+
+  // Initialize adjacency matrix
+  int adj_matrix[MAX_NODES][MAX_NODES] = {0};
+
+  // Read edges and fill the adjacency matrix
+  for (int i = 0; i < E; i++)
+  {
+    int u, v;
+    scanf("%d %d", &u, &v);
+    adj_matrix[u][v] = 1;
+    adj_matrix[v][u] = 1; // since it's an undirected graph
+  }
+
+  int X;
+  scanf("%d", &X);
+
+  // Call BFS function to find the level of node X
+  int result = bfs(V, adj_matrix, X);
+
+  // Output the result
+  printf("%d\n", result);
+
+  return 0;
+}
