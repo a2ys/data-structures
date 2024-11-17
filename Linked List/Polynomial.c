@@ -44,6 +44,22 @@ Node* insertAtEnd(Node* head, int coefficient, int exponent) {
   return head;
 }
 
+int comparePolynomials(Node* polynomial1, Node* polynomial2) {
+  while (polynomial1 != NULL && polynomial2 != NULL) {
+    if (polynomial1->term->exponent != polynomial2->term->exponent) {
+      return 0;
+    }
+    if (polynomial1->term->coefficient != polynomial2->term->coefficient) {
+      return 0;
+    }
+
+    polynomial1 = polynomial1->next;
+    polynomial2 = polynomial2->next;
+  }
+
+  return polynomial1 == NULL && polynomial2 == NULL;
+}
+
 void printPolynomial(Node* head) {
   Node* temp = head;
 
@@ -125,6 +141,31 @@ int main() {
 
   printf("Resultant Polynomial: ");
   printPolynomial(result);
+
+  printf("Polynomials are: ");
+  if (comparePolynomials(poly1, poly2)) {
+    printf("EQUAL\n");
+  } else {
+    printf("NOT EQUAL\n");
+  }
+
+  Node* poly3 = NULL;
+  Node* poly4 = NULL;
+
+  poly3 = insertAtEnd(poly3, 2, 2);
+  poly3 = insertAtEnd(poly3, 1, 1);
+  poly3 = insertAtEnd(poly3, 3, 0);
+
+  poly4 = insertAtEnd(poly4, 2, 2);
+  poly4 = insertAtEnd(poly4, 1, 1);
+  poly4 = insertAtEnd(poly4, 3, 0);
+
+  printf("Polynomials are: ");
+  if (comparePolynomials(poly3, poly4)) {
+    printf("EQUAL\n");
+  } else {
+    printf("NOT EQUAL\n");
+  }
 
   freePolynomial(poly1);
   freePolynomial(poly2);
