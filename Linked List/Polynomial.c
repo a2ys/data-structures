@@ -120,6 +120,56 @@ Node* add(Node* polynomial1, Node* polynomial2) {
   return result;
 }
 
+Node* multiply(Node* poly1, Node* poly2) {
+  Node* result = NULL;
+  Node* p1 = poly1;
+
+  while (p1 != NULL) {
+    Node* p2 = poly2;
+    
+    while (p2 != NULL) {
+      int coeff = p1->term->coefficient * p2->term->coefficient;
+      int exp = p1->term->exponent + p2->term->exponent;
+      
+      result = insertAtEnd(result, coeff, exp);
+      
+      p2 = p2->next;
+    }
+    
+    p1 = p1->next;
+  }
+
+  Node* simplified = NULL;
+  Node* current = result;
+
+  while (current != NULL) {
+    Node* temp = simplified;
+    int coefficient = current->term->coefficient;
+    int exponent = current->term->exponent;
+    
+    Node* prev = NULL;
+    
+    while (temp != NULL) {
+      if (temp->term->exponent == exponent) {
+        temp->term->coefficient += coefficient;
+        break;
+      }
+      prev = temp;
+      temp = temp->next;
+    }
+
+    if (temp == NULL) {
+      simplified = insertAtEnd(simplified, coefficient, exponent);
+    }
+
+    current = current->next;
+  }
+
+  freePolynomial(result);
+
+  return simplified;
+}
+
 int main() {
   Node* poly1 = NULL;
   Node* poly2 = NULL;
@@ -141,6 +191,12 @@ int main() {
 
   printf("Resultant Polynomial: ");
   printPolynomial(result);
+
+  Node* result2 = multiply(poly1, poly2);
+  printf("Resultant Polynomial (Multiplication): ");
+  printPolynomial(result2);
+
+  printf("\n");
 
   printf("Polynomials are: ");
   if (comparePolynomials(poly1, poly2)) {
