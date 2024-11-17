@@ -55,6 +55,45 @@ int searchDFS(TreeNode* root, int value) {
   return leftResult || rightResult;
 }
 
+TreeNode* findMin(TreeNode* root) {
+  while (root && root->left) {
+    root = root->left;
+  }
+  return root;
+}
+
+TreeNode* deleteNode(TreeNode* root, int key) {
+  if (root == NULL) {
+    return NULL;
+  }
+
+  if (key < root->data) {
+    root->left = deleteNode(root->left, key);
+  }
+  else if (key > root->data) {
+    root->right = deleteNode(root->right, key);
+  }
+  else {
+    if (root->left == NULL) {
+      TreeNode* temp = root->right;
+      free(root);
+      return temp;
+    }
+    else if (root->right == NULL) {
+      TreeNode* temp = root->left;
+      free(root);
+      return temp;
+    }
+
+    TreeNode* temp = findMin(root->right);
+
+    root->data = temp->data;
+
+    root->right = deleteNode(root->right, temp->data);
+  }
+  return root;
+}
+
 void inOrder(TreeNode* root) {
   if (root) {
     inOrder(root->left);
@@ -114,7 +153,7 @@ int main() {
 
   root = insert(root, 5);
   
-  // inOrder(root);
+  inOrder(root);
 
   BFS(root);
 
