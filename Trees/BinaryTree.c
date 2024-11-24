@@ -55,42 +55,55 @@ int searchDFS(TreeNode* root, int value) {
   return leftResult || rightResult;
 }
 
-TreeNode* findMin(TreeNode* root) {
-  while (root && root->left) {
-    root = root->left;
-  }
-  return root;
-}
-
 TreeNode* deleteNode(TreeNode* root, int key) {
-  if (root == NULL) {
-    return NULL;
-  }
+  if (root == NULL) return NULL;
 
-  if (key < root->data) {
-    root->left = deleteNode(root->left, key);
-  }
-  else if (key > root->data) {
-    root->right = deleteNode(root->right, key);
-  }
-  else {
-    if (root->left == NULL) {
-      TreeNode* temp = root->right;
+  if (root->left == NULL && root->right == NULL) {
+    if (root->data == key) {
       free(root);
-      return temp;
+      return NULL;
     }
-    else if (root->right == NULL) {
-      TreeNode* temp = root->left;
-      free(root);
-      return temp;
-    }
-
-    TreeNode* temp = findMin(root->right);
-
-    root->data = temp->data;
-
-    root->right = deleteNode(root->right, temp->data);
+    return root;
   }
+
+  TreeNode* keyNode = NULL;
+  TreeNode* temp;
+  TreeNode* last;
+
+  TreeNode* queue[100];
+  int front = 0, rear = 0;
+  queue[rear++] = root;
+
+  while (front < rear) {
+    temp = queue[front++];
+
+    if (temp->data == key) {
+      keyNode = temp;
+    }
+
+    if (temp->left) {
+      queue[rear++] = temp->left;
+      last = temp;
+    }
+
+    if (temp->right) {
+      queue[rear++] = temp->right;
+      last = temp;
+    }
+  }
+
+  if (keyNode) {
+    keyNode->data = temp->data;
+
+    if (last->right == temp) {
+      last->right = NULL;
+    } else {
+      last->left = NULL;
+    }
+
+    free(temp);
+  }
+
   return root;
 }
 
@@ -138,24 +151,20 @@ void BFS(TreeNode* root) {
 }
 
 int main() {
-  TreeNode* root = createNode(1);
-  TreeNode* n1 = createNode(2);
-  TreeNode* n2 = createNode(3);
-  TreeNode* n3 = createNode(4);
-  TreeNode* n5 = createNode(6);
-  TreeNode* n6 = createNode(7);
-
-  root->left = n1;
-  root->right = n2;
-  n1->left = n3;
-  n2->left = n5;
-  n2->right = n6;
-
+  TreeNode* root = NULL;
+  root = insert(root, 1);
+  root = insert(root, 2);
+  root = insert(root, 3);
+  root = insert(root, 4);
   root = insert(root, 5);
+  root = insert(root, 6);
+  root = insert(root, 7);
   
   inOrder(root);
+  printf("\n");
 
   BFS(root);
+  printf("\n");
 
   return 0;
 }
